@@ -1,10 +1,13 @@
+
 package com.CivicAI.backend.controller;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,13 +15,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.CivicAI.backend.entity.Complaint;
 import com.CivicAI.backend.service.ComplaintService;
 
 @RestController
 @RequestMapping("/api/complaints")
+@CrossOrigin(origins = "http://localhost:5174")
 public class ComplaintController {
 
     private final ComplaintService complaintService;
@@ -27,184 +33,128 @@ public class ComplaintController {
         this.complaintService = complaintService;
     }
 
-    // =========================================================
-    // 1. SUBMIT COMPLAINT
-    // =========================================================
-
-    @PostMapping
+    // SUBMIT COMPLAINT - JSON
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Complaint> submitComplaint(
-            @RequestBody Complaint complaint) {
+            @RequestBody Complaint complaint,
+            @RequestParam(value = "userId", required = false) Long userId) {
 
         Complaint savedComplaint =
-                complaintService.submitComplaint(complaint);
+                complaintService.submitComplaint(complaint, userId);
 
         return ResponseEntity.ok(savedComplaint);
     }
 
-    // =========================================================
-    // 2. GET ALL COMPLAINTS
-    // =========================================================
+    // SUBMIT COMPLAINT - MULTIPART / IMAGE
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Complaint> submitMultipartComplaint(
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("location") String location,
+            @RequestParam(value = "latitude", required = false) Double latitude,
+            @RequestParam(value = "longitude", required = false) Double longitude,
+            @RequestParam(value = "userId", required = false) Long userId,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
 
+        Complaint complaint = new Complaint();
+        complaint.setTitle(title);
+        complaint.setDescription(description);
+        complaint.setLocation(location);
+        complaint.setLatitude(latitude);
+        complaint.setLongitude(longitude);
+
+        Complaint savedComplaint =
+                complaintService.submitMultipartComplaint(
+                        complaint, userId, image);
+
+        return ResponseEntity.ok(savedComplaint);
+    }
+
+    // GET ALL COMPLAINTS OR COMPLAINTS BY USER
     @GetMapping
-    public ResponseEntity<List<Complaint>> getAllComplaints() {
+    public ResponseEntity<List<Complaint>> getComplaints(
+            @RequestParam(value = "userId", required = false) Long userId) {
+
+        if (userId != null) {
+            return ResponseEntity.ok(
+                    complaintService.getComplaintsByUserId(userId));
+        }
 
         return ResponseEntity.ok(
-                complaintService.getAllComplaints()
-        );
+                complaintService.getAllComplaints());
     }
 
-    // =========================================================
-    // 3. COMPLAINT STATISTICS
-    // =========================================================
-
-    @GetMapping("/statistics")
-    public ResponseEntity<Map<String, Long>> getComplaintStatistics() {
-
-        Map<String, Long> statistics =
-                new LinkedHashMap<>();
-
-        statistics.put(
-                "total",
-                (long) complaintService
-                        .getAllComplaints()
-                        .size()
-        );
-
-        statistics.put(
-                "submitted",
-                complaintService.getSubmittedCount()
-        );
-
-        statistics.put(
-                "inProgress",
-                complaintService.getInProgressCount()
-        );
-
-        statistics.put(
-                "resolved",
-                complaintService.getResolvedCount()
-        );
-
-        statistics.put(
-                "duplicates",
-                complaintService.getDuplicateCount()
-        );
-
-        return ResponseEntity.ok(statistics);
-    }
-
-    // =========================================================
-    // 4. FILTER BY STATUS
-    // =========================================================
-
-    @GetMapping("/filter/status")
-    public ResponseEntity<List<Complaint>> getComplaintsByStatus(
-            @RequestParam String status) {
-
-        return ResponseEntity.ok(
-                complaintService.getComplaintsByStatus(status)
-        );
-    }
-
-    // =========================================================
-    // 5. FILTER BY CATEGORY
-    // =========================================================
-
-    @GetMapping("/filter/category")
-    public ResponseEntity<List<Complaint>> getComplaintsByCategory(
-            @RequestParam String category) {
-
-        return ResponseEntity.ok(
-                complaintService.getComplaintsByCategory(category)
-        );
-    }
-
-    // =========================================================
-    // 6. FILTER BY DEPARTMENT
-    // =========================================================
-
-    @GetMapping("/filter/department")
-    public ResponseEntity<List<Complaint>> getComplaintsByDepartment(
-            @RequestParam Long departmentId) {
-
-        return ResponseEntity.ok(
-                complaintService.getComplaintsByDepartment(
-                        departmentId
-                )
-        );
-    }
-
-    // =========================================================
-    // 7. GET COMPLAINT BY ID
-    // =========================================================
-
+    // GET COMPLAINT BY ID
     @GetMapping("/{id}")
     public ResponseEntity<Complaint> getComplaintById(
             @PathVariable Long id) {
 
-        return complaintService.getComplaintById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(
+                complaintService.getComplaintById(id));
     }
 
-    // =========================================================
-    // 8. ASSIGN DEPARTMENT
-    // =========================================================
-
-    @PutMapping("/{complaintId}/department/{departmentId}")
-    public ResponseEntity<Complaint> assignDepartment(
-            @PathVariable Long complaintId,
-            @PathVariable Long departmentId) {
-
-        Complaint complaint =
-                complaintService.assignDepartment(
-                        complaintId,
-                        departmentId
-                );
-
-        return ResponseEntity.ok(complaint);
-    }
-
-    // =========================================================
-    // 9. UPDATE STATUS
-    // =========================================================
-
+    // UPDATE COMPLAINT STATUS
     @PutMapping("/{id}/status")
     public ResponseEntity<Complaint> updateStatus(
             @PathVariable Long id,
             @RequestParam String status) {
 
         Complaint updatedComplaint =
-                complaintService.updateStatus(
-                        id,
-                        status
-                );
+                complaintService.updateComplaintStatus(id, status);
 
         return ResponseEntity.ok(updatedComplaint);
     }
 
-    // =========================================================
-    // 10. ADD IMAGE
-    // =========================================================
+    // ASSIGN DEPARTMENT
+    @PutMapping("/{id}/department/{departmentId}")
+    public ResponseEntity<Complaint> assignDepartment(
+            @PathVariable Long id,
+            @PathVariable Long departmentId) {
 
-    @PutMapping("/{complaintId}/image")
-    public ResponseEntity<Complaint> addImageToComplaint(
-            @PathVariable Long complaintId,
+        return ResponseEntity.ok(
+                complaintService.assignDepartment(id, departmentId));
+    }
+
+    // ADD RESOLUTION
+    @PutMapping("/{id}/resolution")
+    public ResponseEntity<Complaint> addResolution(
+            @PathVariable Long id,
+            @RequestParam String description) {
+
+        return ResponseEntity.ok(
+                complaintService.addResolution(id, description));
+    }
+
+    // VERIFY RESOLUTION
+    @PutMapping("/{id}/verify")
+    public ResponseEntity<Complaint> verifyResolution(
+            @PathVariable Long id,
+            @RequestParam Boolean verified) {
+
+        return ResponseEntity.ok(
+                complaintService.verifyResolution(id, verified));
+    }
+
+    // UPDATE IMAGE PATH
+    @PutMapping("/{id}/image")
+    public ResponseEntity<Complaint> updateImage(
+            @PathVariable Long id,
             @RequestParam String imagePath) {
 
-        Complaint complaint =
-                complaintService
-                        .getComplaintById(complaintId)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Complaint not found"
-                                ));
+        return ResponseEntity.ok(
+                complaintService.updateComplaintImage(id, imagePath));
+    }
 
-        complaint.setImagePath(imagePath);
+    // STATISTICS
+    @GetMapping("/statistics")
+    public ResponseEntity<Map<String, Object>> getStatistics() {
 
-        Complaint updatedComplaint =
-                complaintService.saveComplaint(complaint);
+        Map<String, Object> statistics = new LinkedHashMap<>();
 
-        return ResponseEntity.ok(updatedComplaint);
+        statistics.put(
+                "total",
+                complaintService.getAllComplaints().size());
+
+        return ResponseEntity.ok(statistics);
     }
 }
