@@ -1,0 +1,132 @@
+/* ===================================================
+   CIVICAI GLOBAL STYLES & DESIGN TOKENS
+   =================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Dark Navy Palette */
+  --bg-navy-deep: #071426;
+  --bg-navy: #0B1730;
+  --bg-navy-card: #0D1930;
+  --bg-navy-surface: #0E223D;
+  --bg-navy-hover: #132A4A;
+  
+  /* Brand Accents */
+  --brand-blue: #1677F0;
+  --brand-blue-hover: #1260C4;
+  --brand-blue-light: #EBF4FF;
+  --brand-cyan: #20D4D0;
+  --brand-teal: #12BFAE;
+  
+  /* Light Dashboard Surfaces */
+  --bg-dashboard: #F6F8FB;
+  --bg-dashboard-card: #FFFFFF;
+  --bg-input: #FFFFFF;
+  
+  /* Text Colors */
+  --text-main: #172033;
+  --text-dark: #0F172A;
+  --text-sub: #475569;
+  --text-muted: #64748B;
+  --text-light-muted: #94A3B8;
+  --text-white: #FFFFFF;
+  
+  /* Status Colors */
+  --color-submitted-bg: #E0F2FE;
+  --color-submitted-text: #0284C7;
+  --color-progress-bg: #FEF3C7;
+  --color-progress-text: #D97706;
+  --color-resolved-bg: #DCFCE7;
+  --color-resolved-text: #16A34A;
+  
+  /* Priority Colors */
+  --color-high-bg: #FEE2E2;
+  --color-high-text: #DC2626;
+  --color-med-bg: #FEF3C7;
+  --color-med-text: #D97706;
+  --color-low-bg: #DCFCE7;
+  --color-low-text: #16A34A;
+  
+  /* Borders */
+  --border-card: #E2E8F0;
+  --border-card-subtle: #F1F5F9;
+  --border-navy: #1E3A8A;
+  --border-navy-light: #254B8C;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 2px 8px -2px rgba(15, 23, 42, 0.06), 0 1px 3px -1px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  --shadow-glow-blue: 0 0 15px rgba(22, 119, 240, 0.35);
+  --shadow-glow-cyan: 0 0 15px rgba(32, 212, 208, 0.35);
+  
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-pill: 9999px;
+  
+  /* Dimensions */
+  --sidebar-width: 250px;
+  --header-height: 68px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-main);
+  background-color: var(--bg-dashboard);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: 13.5px;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Common Card Box */
+.card-box {
+  background-color: var(--bg-dashboard-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
